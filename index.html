@@ -1,20 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PWA Notification Demo</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+
+    /* Apple-style modal */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 320px;
+      background: #333;
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .modal p {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: #007AFF;
+    }
+
+    .modal-button:not(:last-child) {
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-button:active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  </style>
 </head>
 <body>
   <h1>PWA Notification Example</h1>
   <button id="notifyBtn">Send Notification</button>
   <button id="alertBtn">Show Alert</button>
 
+  <!-- Custom Apple-style Modal -->
+  <div id="customModal" class="modal">
+    <h2>“PWA Notify” Would Like to Send You Notifications</h2>
+    <p>Notifications may include alerts, sounds, and icon badges. These can be configured in Settings.</p>
+    <div class="modal-buttons">
+      <button class="modal-button" id="denyBtn">Don’t Allow</button>
+      <button class="modal-button" id="allowBtn">Allow</button>
+    </div>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const notifyBtn = document.getElementById('notifyBtn');
       const alertBtn = document.getElementById('alertBtn');
+      const modal = document.getElementById('customModal');
+      const denyBtn = document.getElementById('denyBtn');
+      const allowBtn = document.getElementById('allowBtn');
 
       function sendNotification() {
         new Notification('⏰ It\'s 3:37 PM!', {
@@ -27,20 +97,27 @@
         if (Notification.permission === 'granted') {
           sendNotification();
         } else if (Notification.permission !== 'denied') {
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted') {
-            sendNotification();
-          }
+          modal.style.display = 'block'; // Show custom modal
         }
       }
 
       notifyBtn.addEventListener('click', requestPermissionAndNotify);
 
+      // Show custom modal on button click
       alertBtn.addEventListener('click', () => {
-        if (confirm("Hi")) {
-          console.log("User clicked Continue");
-        } else {
-          console.log("User clicked Cancel");
+        modal.style.display = 'block';
+      });
+
+      // Handle modal buttons
+      denyBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      allowBtn.addEventListener('click', async () => {
+        modal.style.display = 'none';
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          sendNotification();
         }
       });
 
